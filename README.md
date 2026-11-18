@@ -1,5 +1,13 @@
 # Multimodal PDF RAG with Gemini and ChromaDB
 
+[![CI](https://github.com/Victus0904/multimodal-pdf-rag/actions/workflows/ci.yml/badge.svg)](https://github.com/Victus0904/multimodal-pdf-rag/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![Gemini](https://img.shields.io/badge/LLM-Google%20Gemini-4285F4)
+![ChromaDB](https://img.shields.io/badge/vector%20store-ChromaDB-orange)
+![FastAPI](https://img.shields.io/badge/API-FastAPI-009688)
+![Docker](https://img.shields.io/badge/deploy-Docker-2496ED)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 This repository implements a multimodal RAG pipeline over PDF documents using:
 
 - `unstructured` for layout-aware PDF partitioning
@@ -7,6 +15,17 @@ This repository implements a multimodal RAG pipeline over PDF documents using:
 - embedded local `ChromaDB` for persistent vector storage and retrieval
 
 ## Pipeline
+
+```mermaid
+flowchart LR
+    P[PDF] --> U[unstructured<br/>partition]
+    U --> T[Text chunks]
+    U --> TB[Tables] --> GS[Gemini summary]
+    U --> I[Images] --> GV[Gemini vision summary]
+    T & GS & GV --> E[Gemini embeddings] --> C[(ChromaDB)]
+    Q[Question] --> QE[Embed] --> C
+    C --> G[Gemini answer<br/>text context + original images]
+```
 
 1. Ingestion: PDF -> text, tables, images
 2. Summarization: tables and images -> Gemini summaries
@@ -187,3 +206,17 @@ The query flow:
 - Image chunks are summarized with Gemini Vision, embedded as text, and keep the local
   extracted file path in metadata for final multimodal answer generation.
 - Re-ingesting the same PDF replaces previously indexed chunks for that source path.
+
+## Tests
+
+```bash
+pip install pytest httpx
+pytest -q
+```
+
+The API tests stub the PDF parser and Gemini calls, so they run without an API key or the
+heavy `unstructured` stack.
+
+## License
+
+[MIT](LICENSE)
